@@ -46,6 +46,16 @@ export default function Footer() {
                   {t.footer.contact}
                 </a>
               </li>
+              <li>
+                <a 
+                  href="https://dl-365.mindset-it.online/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-zen-orange transition-colors"
+                >
+                  {t.footer.vipassanaTraining}
+                </a>
+              </li>
             </ul>
           </div>
 
