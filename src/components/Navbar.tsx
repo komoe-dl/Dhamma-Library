@@ -41,7 +41,7 @@ export default function Navbar() {
             <Link to="/" className="text-sm font-medium text-zen-gray hover:text-zen-orange transition-colors">
               {t.nav.library}
             </Link>
-            {isValid && pb.authStore.model?.email === 'madgegoodence911@gmail.com' && (
+            {isValid && pb.authStore.model?.role === 'admin' && (
               <Link to="/admin" className="text-sm font-medium text-zen-gray hover:text-zen-orange transition-colors">
                 {t.nav.admin}
               </Link>

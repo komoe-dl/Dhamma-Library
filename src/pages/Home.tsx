@@ -45,7 +45,7 @@ export default function Home() {
       <section id="library" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 border-t border-zen-gray-light">
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 space-y-6 md:space-y-0">
           <div>
-            <h2 className="text-4xl font-serif font-bold text-zen-gray-dark">{t.home.title}</h2>
+            <h2 className="text-4xl font-serif font-bold text-zen-gray-dark leading-relaxed">{t.home.title}</h2>
             <p className="text-zen-gray mt-2">{t.home.subtitle}</p>
           </div>
           

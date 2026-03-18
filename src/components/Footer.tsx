@@ -48,7 +48,7 @@ export default function Footer() {
         </div>
         
         <div className="mt-20 pt-8 border-t border-white/10 text-center text-white/40 text-sm">
-          <p>© {new Date().getFullYear()} {t.footer.rights}</p>
+          <p>© {t.footer.rights}</p>
         </div>
       </div>
     </footer>

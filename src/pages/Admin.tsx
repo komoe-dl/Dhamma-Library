@@ -14,7 +14,9 @@ import {
   CheckCircle2,
   FileText,
   ImageIcon,
-  Upload
+  Upload,
+  Pencil,
+  X
 } from 'lucide-react';
 
 interface UserRecord {
@@ -40,8 +42,10 @@ export default function Admin() {
   const [summary, setSummary] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
+  const [editingBook, setEditingBook] = useState<Book | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const isAdmin = pb.authStore.isValid && pb.authStore.model?.email === 'madgegoodence911@gmail.com';
+  const isAdmin = pb.authStore.isValid && pb.authStore.model?.role === 'admin';
 
   useEffect(() => {
     if (!isAdmin) {
@@ -52,7 +56,11 @@ export default function Admin() {
     const fetchData = async () => {
       try {
         const [booksList, usersList] = await Promise.all([
-          pb.collection('books').getFullList<Book>({ sort: '-created', requestKey: null }),
+          pb.collection('books').getFullList<Book>({ 
+            sort: '-created', 
+            requestKey: null,
+            expand: 'uploaded_by'
+          }),
           pb.collection('users').getFullList<UserRecord>({ sort: '-created', requestKey: null })
         ]);
         setBooks(booksList);
@@ -70,7 +78,8 @@ export default function Admin() {
 
   const handleAddBook = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !cover) {
+    
+    if (!editingBook && (!file || !cover)) {
       setError('Please select both a PDF file and a cover image.');
       return;
     }
@@ -83,13 +92,26 @@ export default function Admin() {
     formData.append('title', title);
     formData.append('author', author);
     formData.append('summary', summary);
-    formData.append('file', file);
-    formData.append('cover', cover);
+    if (file) formData.append('file', file);
+    if (cover) formData.append('cover', cover);
 
     try {
-      const newBook = await pb.collection('books').create<Book>(formData);
-      setBooks([newBook, ...books]);
-      setSuccess(t.admin.addSuccess);
+      if (editingBook) {
+        const updatedBook = await pb.collection('books').update<Book>(editingBook.id, formData, {
+          expand: 'uploaded_by'
+        });
+        setBooks(books.map(b => b.id === editingBook.id ? updatedBook : b));
+        setSuccess(t.admin.updateSuccess);
+        setEditingBook(null);
+      } else {
+        formData.append('uploaded_by', pb.authStore.model?.id);
+        const newBook = await pb.collection('books').create<Book>(formData, {
+          expand: 'uploaded_by'
+        });
+        setBooks([newBook, ...books]);
+        setSuccess(t.admin.addSuccess);
+      }
+      
       // Reset form
       setTitle('');
       setAuthor('');
@@ -97,21 +119,43 @@ export default function Admin() {
       setFile(null);
       setCover(null);
     } catch (err: any) {
-      setError(err.message || 'Failed to add book.');
+      setError(err.message || `Failed to ${editingBook ? 'update' : 'add'} book.`);
     } finally {
       setSubmitting(false);
     }
   };
 
-  const handleDeleteBook = async (id: string) => {
-    if (!window.confirm(t.admin.deleteConfirm)) return;
+  const handleEditClick = (book: Book) => {
+    setEditingBook(book);
+    setTitle(book.title);
+    setAuthor(book.author);
+    setSummary(book.summary);
+    setFile(null);
+    setCover(null);
+    setError('');
+    setSuccess('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
+  const handleCancelEdit = () => {
+    setEditingBook(null);
+    setTitle('');
+    setAuthor('');
+    setSummary('');
+    setFile(null);
+    setCover(null);
+    setError('');
+  };
+
+  const handleDeleteBook = async (id: string) => {
     try {
       await pb.collection('books').delete(id);
       setBooks(books.filter(b => b.id !== id));
       setSuccess(t.admin.deleteSuccess);
+      setDeletingId(null);
     } catch (err: any) {
       setError(err.message || 'Failed to delete book.');
+      setDeletingId(null);
     }
   };
 
@@ -156,12 +200,29 @@ export default function Admin() {
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Add Book Form */}
+          {/* Add/Edit Book Form */}
           <div className="lg:col-span-1">
             <div className="bg-white rounded-3xl shadow-xl p-8 border border-zen-gray-light sticky top-24">
-              <div className="flex items-center space-x-2 mb-6">
-                <Plus className="w-5 h-5 text-zen-orange" />
-                <h2 className="text-xl font-serif font-bold text-zen-gray-dark">{t.admin.addBook}</h2>
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-2">
+                  {editingBook ? (
+                    <Pencil className="w-5 h-5 text-zen-orange" />
+                  ) : (
+                    <Plus className="w-5 h-5 text-zen-orange" />
+                  )}
+                  <h2 className="text-xl font-serif font-bold text-zen-gray-dark">
+                    {editingBook ? t.admin.updateBook : t.admin.addBook}
+                  </h2>
+                </div>
+                {editingBook && (
+                  <button 
+                    onClick={handleCancelEdit}
+                    className="p-2 text-zen-gray hover:text-zen-orange transition-colors"
+                    title={t.admin.cancel}
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
               </div>
 
               <form onSubmit={handleAddBook} className="space-y-5">
@@ -210,7 +271,7 @@ export default function Admin() {
                       <input
                         type="file"
                         accept=".pdf"
-                        required
+                        required={!editingBook}
                         onChange={(e) => setFile(e.target.files?.[0] || null)}
                         className="hidden"
                         id="pdf-upload"
@@ -235,7 +296,7 @@ export default function Admin() {
                       <input
                         type="file"
                         accept="image/*"
-                        required
+                        required={!editingBook}
                         onChange={(e) => setCover(e.target.files?.[0] || null)}
                         className="hidden"
                         id="cover-upload"
@@ -253,23 +314,35 @@ export default function Admin() {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full py-4 bg-zen-orange hover:bg-zen-orange-light text-white rounded-xl font-bold transition-all shadow-lg shadow-zen-orange/20 disabled:opacity-50 flex items-center justify-center space-x-2"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                      <span>{t.admin.uploading}</span>
-                    </>
-                  ) : (
-                    <>
-                      <Plus className="w-5 h-5" />
-                      <span>{t.admin.addToLibrary}</span>
-                    </>
+                <div className="flex flex-col space-y-3">
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="w-full py-4 bg-zen-orange hover:bg-zen-orange-light text-white rounded-xl font-bold transition-all shadow-lg shadow-zen-orange/20 disabled:opacity-50 flex items-center justify-center space-x-2"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <span>{t.admin.uploading}</span>
+                      </>
+                    ) : (
+                      <>
+                        {editingBook ? <CheckCircle2 className="w-5 h-5" /> : <Plus className="w-5 h-5" />}
+                        <span>{editingBook ? t.admin.saveChanges : t.admin.addToLibrary}</span>
+                      </>
+                    )}
+                  </button>
+                  
+                  {editingBook && (
+                    <button
+                      type="button"
+                      onClick={handleCancelEdit}
+                      className="w-full py-3 border border-zen-gray-light text-zen-gray-dark rounded-xl font-bold hover:bg-zen-cream transition-all"
+                    >
+                      {t.admin.cancel}
+                    </button>
                   )}
-                </button>
+                </div>
               </form>
             </div>
           </div>
@@ -292,6 +365,7 @@ export default function Admin() {
                     <tr className="border-b border-zen-gray-light">
                       <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">{t.nav.library}</th>
                       <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">{t.admin.author}</th>
+                      <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">{t.admin.uploadedBy}</th>
                       <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray text-right">Actions</th>
                     </tr>
                   </thead>
@@ -312,14 +386,45 @@ export default function Admin() {
                           </div>
                         </td>
                         <td className="py-4 text-sm text-zen-gray">{book.author}</td>
+                        <td className="py-4 text-sm text-zen-gray">
+                          {book.expand?.uploaded_by?.name || book.expand?.uploaded_by?.email || '-'}
+                        </td>
                         <td className="py-4 text-right">
-                          <button
-                            onClick={() => handleDeleteBook(book.id)}
-                            className="p-2 text-zen-gray hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                            title="Delete Book"
-                          >
-                            <Trash2 className="w-5 h-5" />
-                          </button>
+                          <div className="flex items-center justify-end space-x-2">
+                            {deletingId === book.id ? (
+                              <div className="flex items-center space-x-2 animate-in fade-in slide-in-from-right-2">
+                                <button
+                                  onClick={() => handleDeleteBook(book.id)}
+                                  className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-colors"
+                                >
+                                  Confirm
+                                </button>
+                                <button
+                                  onClick={() => setDeletingId(null)}
+                                  className="px-3 py-1 bg-zen-gray-light text-zen-gray-dark text-xs font-bold rounded-lg hover:bg-zen-gray transition-colors"
+                                >
+                                  Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <>
+                                <button
+                                  onClick={() => handleEditClick(book)}
+                                  className="p-2 text-zen-gray hover:text-zen-orange hover:bg-zen-orange/5 rounded-lg transition-all"
+                                  title="Edit Book"
+                                >
+                                  <Pencil className="w-5 h-5" />
+                                </button>
+                                <button
+                                  onClick={() => setDeletingId(book.id)}
+                                  className="p-2 text-zen-gray hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                  title="Delete Book"
+                                >
+                                  <Trash2 className="w-5 h-5" />
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}

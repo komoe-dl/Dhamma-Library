@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import pb from '../lib/pocketbase';
 import { motion } from 'motion/react';
-import { Lock, Mail, Loader2, AlertCircle } from 'lucide-react';
+import { Lock, Mail, Loader2, AlertCircle, X } from 'lucide-react';
 import { useLanguage } from '../lib/LanguageContext';
 
 export default function Login() {
@@ -29,12 +29,20 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-[calc(100-64px)] flex items-center justify-center px-4 py-20">
+    <div className="min-h-[calc(100vh-64px)] flex items-center justify-center px-4 py-20 relative">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-zen-gray-light"
+        className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-zen-gray-light relative"
       >
+        <button
+          onClick={() => navigate('/')}
+          className="absolute top-6 right-6 p-2 rounded-full text-zen-gray hover:text-zen-orange hover:bg-zen-orange/5 transition-all"
+          aria-label="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-zen-orange/10 text-zen-orange mb-6">
             <Lock className="w-8 h-8" />
@@ -103,6 +111,15 @@ export default function Login() {
               <span>{t.login.signIn}</span>
             )}
           </button>
+
+          <div className="text-center mt-6">
+            <p className="text-sm text-zen-gray">
+              {t.login.noAccount}{' '}
+              <Link to="/signup" className="text-zen-orange font-bold hover:underline">
+                {t.login.signUp}
+              </Link>
+            </p>
+          </div>
         </form>
       </motion.div>
     </div>

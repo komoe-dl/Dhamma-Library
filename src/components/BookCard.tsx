@@ -25,12 +25,12 @@ const BookCard: React.FC<BookCardProps> = ({ book, onClick }) => {
           referrerPolicy="no-referrer"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-6">
-          <p className="text-white font-serif text-lg font-bold leading-tight">{book.title}</p>
+          <p className="text-white font-serif text-lg font-bold leading-snug">{book.title}</p>
           <p className="text-white/80 text-sm mt-1">{book.author}</p>
         </div>
       </div>
       <div className="mt-4 text-center">
-        <h3 className="text-zen-gray-dark font-serif font-bold text-lg leading-tight group-hover:text-zen-orange transition-colors">
+        <h3 className="text-zen-gray-dark font-serif font-bold text-lg leading-snug group-hover:text-zen-orange transition-colors">
           {book.title}
         </h3>
         <p className="text-zen-gray text-sm mt-1 italic">{book.author}</p>

@@ -9,6 +9,14 @@ export interface Book {
   summary: string;
   file: string;
   cover: string;
+  uploaded_by?: string;
+  expand?: {
+    uploaded_by?: {
+      id: string;
+      name: string;
+      email: string;
+    };
+  };
 }
 
 export interface AuthState {

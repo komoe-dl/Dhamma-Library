@@ -53,7 +53,7 @@ export default function BookDetailsModal({ book, onClose }: BookDetailsModalProp
           <div className="w-full md:w-3/5 p-8 md:p-12 overflow-y-auto">
             <div className="space-y-6">
               <div>
-                <h2 className="text-3xl md:text-4xl font-serif font-bold text-zen-gray-dark leading-tight">
+                <h2 className="text-3xl md:text-4xl font-serif font-bold text-zen-gray-dark leading-snug">
                   {book.title}
                 </h2>
                 <div className="flex items-center mt-3 text-zen-orange space-x-2">
