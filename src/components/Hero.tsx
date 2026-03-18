@@ -21,10 +21,10 @@ export default function Hero() {
           <span className="inline-block px-4 py-1.5 rounded-full bg-zen-orange/10 text-zen-orange text-xs font-bold uppercase tracking-widest mb-6">
             {t.hero.badge}
           </span>
-          <h1 className="text-4xl md:text-7xl font-serif font-bold text-zen-gray-dark mb-8 leading-tight whitespace-pre-line">
+          <h1 className="text-3xl md:text-5xl lg:text-6xl font-serif font-bold text-zen-gray-dark mb-8 leading-tight whitespace-pre-line">
             {t.hero.title}
           </h1>
-          <p className="max-w-2xl mx-auto text-lg md:text-xl text-zen-gray leading-relaxed mb-12">
+          <p className="max-w-3xl mx-auto text-lg md:text-xl text-zen-gray leading-relaxed mb-12">
             {t.hero.subtitle}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">

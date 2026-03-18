@@ -10,8 +10,8 @@ export const translations = {
     },
     hero: {
       badge: 'ဓမ္မစိတ်ထား အကယ်ဒမီ',
-      title: 'ငြိမ်းချမ်းပြီး ပညာရှိသော \nစိတ်ကို ပျိုးထောင်ပါ',
-      subtitle: 'ကျွန်ုပ်တို့၏ စုစည်းထားသော ဓမ္မတရားတော်များ၊ သတိပဋ္ဌာန်ကျင့်စဉ်များနှင့် ဝိညာဉ်ရေးရာ အသိပညာများကို လေ့လာပါ။',
+      title: 'ရှေ့စိတ်မှာ အရှိကိုမြင်၊ နောက်စိတ်မှာ သတိယှဉ်၍ ဘဝဒုက္ခကို အဖြေရှာပါ',
+      subtitle: 'သမုတိနယ်မှသည် ပရမတ်နယ်သို့... ဆရာကြီး၏ ဓမ္မလမ်းညွှန်ချက်များ၊ သတိပဋ္ဌာန်ကျင့်စဉ်များနှင့် ဘဝအကျဉ်းသားအဖြစ်မှ လွတ်မြောက်ရာ အသိပညာများကို လေ့လာပါ။',
       explore: 'စာကြည့်တိုက်သို့ သွားရန်',
       learnMore: 'ပိုမိုလေ့လာရန်',
     },
@@ -81,8 +81,8 @@ export const translations = {
     },
     hero: {
       badge: 'Dhamma Mindset Academy',
-      title: 'Cultivate a Mind \nof Peace & Wisdom',
-      subtitle: 'Explore our curated library of Dhamma teachings, mindfulness practices, and spiritual wisdom to guide your journey toward inner clarity.',
+      title: 'Observe the Present: Transform Your Life with Mindfulness.',
+      subtitle: 'Bridge the Gap between Concept and Reality. Study the path to true liberation with Sayagyi’s Dhamma teachings.',
       explore: 'Explore Library',
       learnMore: 'Learn More',
     },
