@@ -42,18 +42,21 @@ export default function Navbar() {
             <Link to="/" className="text-sm font-medium text-zen-gray hover:text-zen-orange transition-colors">
               {t.nav.library}
             </Link>
-            {isValid && (
+            {isValid && user?.role === 'admin' && (
               <Link to="/admin" className="text-sm font-medium text-zen-gray hover:text-zen-orange transition-colors">
                 {t.nav.admin}
               </Link>
             )}
             {isValid ? (
               <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <span className="text-sm font-medium text-zen-gray-dark hidden md:inline">
-                    {user?.name || user?.username}
+                <Link to="/profile" className="flex items-center space-x-2 group">
+                  <div className="w-8 h-8 rounded-full bg-zen-orange/10 flex items-center justify-center group-hover:bg-zen-orange/20 transition-all">
+                    <User className="w-4 h-4 text-zen-orange" />
+                  </div>
+                  <span className="text-sm font-medium text-zen-gray-dark hidden md:inline group-hover:text-zen-orange transition-colors">
+                    {user?.name || user?.username || user?.email?.split('@')[0]}
                   </span>
-                </div>
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="flex items-center space-x-1 text-sm font-medium text-zen-gray hover:text-zen-orange transition-colors"

@@ -16,13 +16,15 @@ import {
   ImageIcon,
   Upload,
   Pencil,
-  X
+  X,
+  Key
 } from 'lucide-react';
 
 interface UserRecord {
   id: string;
   email: string;
   name: string;
+  role: 'admin' | 'student';
   created: string;
 }
 
@@ -44,6 +46,11 @@ export default function Admin() {
   const [cover, setCover] = useState<File | null>(null);
   const [editingBook, setEditingBook] = useState<Book | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [userSearchTerm, setUserSearchTerm] = useState('');
+  const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
+  const [resettingUser, setResettingUser] = useState<UserRecord | null>(null);
+  const [newPassword, setNewPassword] = useState('');
 
   const isAdmin = pb.authStore.isValid && pb.authStore.model?.role === 'admin';
   const isLoggedIn = pb.authStore.isValid;
@@ -159,6 +166,60 @@ export default function Admin() {
       setDeletingId(null);
     }
   };
+
+  const handleToggleRole = async (user: UserRecord) => {
+    setUpdatingUserId(user.id);
+    setError('');
+    const newRole = user.role === 'admin' ? 'student' : 'admin';
+    try {
+      const updatedUser = await pb.collection('users').update<UserRecord>(user.id, { role: newRole });
+      setUsers(users.map(u => u.id === user.id ? updatedUser : u));
+      setSuccess(`Role updated for ${user.email}`);
+    } catch (err: any) {
+      setError(err.message || 'Failed to update role.');
+    } finally {
+      setUpdatingUserId(null);
+    }
+  };
+
+  const handleDeleteUser = async (id: string) => {
+    try {
+      await pb.collection('users').delete(id);
+      setUsers(users.filter(u => u.id !== id));
+      setSuccess('User removed successfully.');
+      setDeletingUserId(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to remove user.');
+      setDeletingUserId(null);
+    }
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resettingUser) return;
+
+    setSubmitting(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      await pb.collection('users').update(resettingUser.id, {
+        password: newPassword,
+        passwordConfirm: newPassword,
+      });
+      setSuccess(t.admin.resetPasswordSuccess);
+      setResettingUser(null);
+      setNewPassword('');
+    } catch (err: any) {
+      setError(err.message || 'Failed to reset password.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const filteredUsers = users.filter(user => 
+    (user.email?.toLowerCase() || '').includes(userSearchTerm.toLowerCase())
+  );
 
   if (loading) {
     return (
@@ -438,33 +499,111 @@ export default function Admin() {
               </div>
             </div>
 
-            {/* Student List */}
+            {/* User Management List */}
             {isAdmin && (
               <div className="bg-white rounded-3xl shadow-xl p-8 border border-zen-gray-light">
-                <div className="flex items-center justify-between mb-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                   <div className="flex items-center space-x-2">
                     <Users className="w-5 h-5 text-zen-orange" />
-                    <h2 className="text-xl font-serif font-bold text-zen-gray-dark">{t.admin.students}</h2>
+                    <h2 className="text-xl font-serif font-bold text-zen-gray-dark">User Management</h2>
                   </div>
-                  <span className="text-sm text-zen-gray font-medium">{users.length} {t.admin.studentsCount}</span>
+                  <div className="relative flex-1 max-w-xs">
+                    <input
+                      type="text"
+                      placeholder="Search by email..."
+                      value={userSearchTerm}
+                      onChange={(e) => setUserSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 rounded-xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-2 focus:ring-zen-orange/20 focus:border-zen-orange transition-all text-sm"
+                    />
+                    <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zen-gray" />
+                  </div>
+                  <span className="text-sm text-zen-gray font-medium">{filteredUsers.length} Users</span>
                 </div>
 
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <thead>
                       <tr className="border-b border-zen-gray-light">
-                        <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">{t.admin.name}</th>
-                        <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">{t.admin.email}</th>
-                        <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray text-right">{t.admin.joined}</th>
+                        <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">User</th>
+                        <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">Role</th>
+                        <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">Joined</th>
+                        <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-zen-gray-light">
-                      {users.map((user) => (
+                      {filteredUsers.map((user) => (
                         <tr key={user.id} className="hover:bg-zen-cream/50 transition-colors">
-                          <td className="py-4 font-medium text-zen-gray-dark">{user.name || 'Anonymous'}</td>
-                          <td className="py-4 text-sm text-zen-gray">{user.email}</td>
-                          <td className="py-4 text-sm text-zen-gray text-right">
+                          <td className="py-4">
+                            <div className="flex flex-col">
+                              <span className="font-medium text-zen-gray-dark">{user.name || 'Anonymous'}</span>
+                              <span className="text-xs text-zen-gray">{user.email}</span>
+                            </div>
+                          </td>
+                          <td className="py-4">
+                            {user.role === 'admin' ? (
+                              <span className="px-2 py-1 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider">
+                                Admin
+                              </span>
+                            ) : (
+                              <span className="px-2 py-1 rounded-full bg-zen-gray-light text-zen-gray-dark text-[10px] font-bold uppercase tracking-wider">
+                                Student
+                              </span>
+                            )}
+                          </td>
+                          <td className="py-4 text-sm text-zen-gray">
                             {new Date(user.created).toLocaleDateString()}
+                          </td>
+                          <td className="py-4 text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              {updatingUserId === user.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin text-zen-orange" />
+                              ) : (
+                                <button
+                                  onClick={() => handleToggleRole(user)}
+                                  className="p-2 text-zen-gray hover:text-zen-orange hover:bg-zen-orange/5 rounded-lg transition-all"
+                                  title={`Make ${user.role === 'admin' ? 'Student' : 'Admin'}`}
+                                >
+                                  <Users className="w-4 h-4" />
+                                </button>
+                              )}
+
+                              {pb.authStore.model?.id !== user.id && (
+                                <button
+                                  onClick={() => setResettingUser(user)}
+                                  className="p-2 text-zen-gray hover:text-zen-orange hover:bg-zen-orange/5 rounded-lg transition-all"
+                                  title={t.admin.resetPassword}
+                                >
+                                  <Key className="w-4 h-4" />
+                                </button>
+                              )}
+
+                              {deletingUserId === user.id ? (
+                                <div className="flex items-center space-x-2 animate-in fade-in slide-in-from-right-2">
+                                  <button
+                                    onClick={() => handleDeleteUser(user.id)}
+                                    className="px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-lg hover:bg-red-600 transition-colors"
+                                  >
+                                    Confirm
+                                  </button>
+                                  <button
+                                    onClick={() => setDeletingUserId(null)}
+                                    className="px-3 py-1 bg-zen-gray-light text-zen-gray-dark text-xs font-bold rounded-lg hover:bg-zen-gray transition-colors"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                pb.authStore.model?.id !== user.id && (
+                                  <button
+                                    onClick={() => setDeletingUserId(user.id)}
+                                    className="p-2 text-zen-gray hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                    title="Remove User"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                )
+                              )}
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -476,6 +615,70 @@ export default function Admin() {
           </div>
         </div>
       </motion.div>
+
+      {/* Reset Password Modal */}
+      {resettingUser && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="bg-white rounded-3xl shadow-2xl p-8 max-w-md w-full border border-zen-gray-light"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-2">
+                <Key className="w-5 h-5 text-zen-orange" />
+                <h3 className="text-xl font-serif font-bold text-zen-gray-dark">{t.admin.resetPassword}</h3>
+              </div>
+              <button 
+                onClick={() => setResettingUser(null)}
+                className="p-2 text-zen-gray hover:text-zen-orange transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-sm text-zen-gray mb-6">
+              Resetting password for: <span className="font-bold text-zen-gray-dark">{resettingUser.email}</span>
+            </p>
+
+            <form onSubmit={handleResetPassword} className="space-y-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-zen-gray-dark uppercase tracking-wider">{t.signup.password}</label>
+                <input
+                  type="password"
+                  required
+                  autoFocus
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full px-4 py-3 rounded-xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-2 focus:ring-zen-orange/20 focus:border-zen-orange transition-all"
+                  placeholder="New password (min 8 chars)"
+                />
+              </div>
+
+              <div className="flex space-x-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setResettingUser(null)}
+                  className="flex-1 py-3 border border-zen-gray-light text-zen-gray-dark rounded-xl font-bold hover:bg-zen-cream transition-all"
+                >
+                  {t.admin.cancel}
+                </button>
+                <button
+                  type="submit"
+                  disabled={submitting || newPassword.length < 8}
+                  className="flex-1 py-3 bg-zen-orange hover:bg-zen-orange-light text-white rounded-xl font-bold transition-all shadow-lg shadow-zen-orange/20 disabled:opacity-50 flex items-center justify-center space-x-2"
+                >
+                  {submitting ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <span>{t.admin.resetPassword}</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
