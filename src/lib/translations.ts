@@ -8,6 +8,7 @@ export const translations = {
       logout: 'ထွက်ရန်',
       login: 'ဝင်ရန်',
       profile: 'ကိုယ်ရေးအချက်အလက်',
+      guide: 'လမ်းညွှန်',
     },
     hero: {
       badge: 'ဓမ္မ စာကြည့်တိုက်',
@@ -107,7 +108,7 @@ export const translations = {
     footer: {
       description: "အရှိကို အရှိအတိုင်း သိမြင်သည့် 'ရှေ့စိတ်' နှင့် သတိပဋ္ဌာန် လက်တွေ့ကျင့်စဉ်များမှတစ်ဆင့် လူသားတိုင်း မိမိစိတ်ကို ကိုယ်တိုင် ဆန်းစစ်နိုင်ပြီး ငြိမ်းချမ်းသော ဘဝကို တည်ဆောက်နိုင်ရန် ရည်ရွယ်ပါသည်။ 🧘‍♂️",
       quickLinks: 'အမြန်လင့်ခ်များ',
-      about: 'အကယ်ဒမီအကြောင်း',
+      about: 'စာကြည့်တိုက်အကြောင်း',
       library: 'စာကြည့်တိုက်',
       meditation: 'တရားထိုင်ခြင်း လမ်းညွှန်',
       contact: 'ဆက်သွယ်ရန်',
@@ -125,6 +126,7 @@ export const translations = {
       logout: 'Logout',
       login: 'Login',
       profile: 'Profile',
+      guide: 'Guide',
     },
     hero: {
       badge: 'Dhamma Library',
@@ -224,7 +226,7 @@ export const translations = {
     footer: {
       description: "Our goal is to empower everyone to analyze their own minds through 'bare awareness' and mindfulness practices, building a peaceful life based on reality.",
       quickLinks: 'Quick Links',
-      about: 'About Academy',
+      about: 'About Library',
       library: 'Library',
       meditation: 'Meditation Guides',
       contact: 'Contact Us',

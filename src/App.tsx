@@ -13,6 +13,7 @@ import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import Admin from './pages/Admin';
 import Profile from './pages/Profile';
+import Guide from './pages/Guide';
 
 export default function App() {
   return (
@@ -27,6 +28,7 @@ export default function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/guide" element={<Guide />} />
             </Routes>
           </main>
           <Footer />

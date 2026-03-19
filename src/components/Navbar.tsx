@@ -25,7 +25,7 @@ export default function Navbar() {
         <div className="flex justify-between h-16 items-center">
           <Link to="/" className="flex items-center space-x-2 group">
             <BookIcon className="w-6 h-6 text-zen-orange transition-transform group-hover:rotate-12" />
-            <span className="text-xl font-serif font-bold tracking-tight text-zen-gray-dark">
+            <span className="text-xl font-serif font-bold tracking-tight text-zen-green">
               Dhamma Library
             </span>
           </Link>
@@ -41,6 +41,9 @@ export default function Navbar() {
 
             <Link to="/" className="text-sm font-medium text-zen-gray hover:text-zen-orange transition-colors">
               {t.nav.library}
+            </Link>
+            <Link to="/guide" className="text-sm font-medium text-zen-gray hover:text-zen-orange transition-colors">
+              {t.nav.guide}
             </Link>
             {isValid && user?.role === 'admin' && (
               <Link to="/admin" className="text-sm font-medium text-zen-gray hover:text-zen-orange transition-colors">
