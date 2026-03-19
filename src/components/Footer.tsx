@@ -24,8 +24,16 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-serif font-bold mb-6">{t.footer.quickLinks}</h4>
             <ul className="space-y-4 text-white/60">
-              <li><a href="#" className="hover:text-zen-orange transition-colors">{t.footer.about}</a></li>
-              <li><a href="#" className="hover:text-zen-orange transition-colors">{t.footer.library}</a></li>
+              <li>
+                <a 
+                  href="https://script.google.com/macros/s/AKfycbzM7nmlj6y6qv-emnHWl4aEkP5XGm8RrZObX_yqkEgzpfkEW1cSXT_mdJZeX352GbR0kg/exec" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-zen-orange transition-colors"
+                >
+                  {t.footer.about}
+                </a>
+              </li>
               <li>
                 <a 
                   href="https://mindful-project.pages.dev/" 
@@ -43,7 +51,17 @@ export default function Footer() {
                   rel="noopener noreferrer" 
                   className="hover:text-zen-orange transition-colors"
                 >
-                  {t.footer.contact}
+                  {t.footer.biography}
+                </a>
+              </li>
+              <li>
+                <a 
+                  href="https://notebooklm.google.com/notebook/5c693072-7f7a-40a2-84da-8060c1213a8d" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-zen-orange transition-colors"
+                >
+                  {t.footer.notebookLM}
                 </a>
               </li>
               <li>

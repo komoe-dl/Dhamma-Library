@@ -34,9 +34,14 @@ export default function Hero() {
             >
               {t.hero.explore}
             </a>
-            <button className="w-full sm:w-auto px-10 py-4 border-2 border-zen-gray-light text-zen-gray-dark rounded-full font-bold hover:border-zen-orange hover:text-zen-orange transition-all">
+            <a
+              href="https://dl-audio-to-ebooks.pages.dev/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto px-10 py-4 border-2 border-zen-gray-light text-zen-gray-dark rounded-full font-bold hover:border-zen-orange hover:text-zen-orange transition-all text-center"
+            >
               {t.hero.learnMore}
-            </button>
+            </a>
           </div>
         </motion.div>
       </div>
