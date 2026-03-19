@@ -46,10 +46,11 @@ export default function Admin() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const isAdmin = pb.authStore.isValid && pb.authStore.model?.role === 'admin';
+  const isLoggedIn = pb.authStore.isValid;
 
   useEffect(() => {
-    if (!isAdmin) {
-      navigate('/');
+    if (!isLoggedIn) {
+      navigate('/login');
       return;
     }
 
@@ -61,7 +62,7 @@ export default function Admin() {
             requestKey: null,
             expand: 'uploaded_by'
           }),
-          pb.collection('users').getFullList<UserRecord>({ sort: '-created', requestKey: null })
+          isAdmin ? pb.collection('users').getFullList<UserRecord>({ sort: '-created', requestKey: null }) : Promise.resolve([])
         ]);
         setBooks(booksList);
         setUsers(usersList);
@@ -74,7 +75,7 @@ export default function Admin() {
     };
 
     fetchData();
-  }, [isAdmin, navigate]);
+  }, [isLoggedIn, isAdmin, navigate]);
 
   const handleAddBook = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -408,20 +409,24 @@ export default function Admin() {
                               </div>
                             ) : (
                               <>
-                                <button
-                                  onClick={() => handleEditClick(book)}
-                                  className="p-2 text-zen-gray hover:text-zen-orange hover:bg-zen-orange/5 rounded-lg transition-all"
-                                  title="Edit Book"
-                                >
-                                  <Pencil className="w-5 h-5" />
-                                </button>
-                                <button
-                                  onClick={() => setDeletingId(book.id)}
-                                  className="p-2 text-zen-gray hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
-                                  title="Delete Book"
-                                >
-                                  <Trash2 className="w-5 h-5" />
-                                </button>
+                                {pb.authStore.model?.id === book.uploaded_by && (
+                                  <button
+                                    onClick={() => handleEditClick(book)}
+                                    className="p-2 text-zen-gray hover:text-zen-orange hover:bg-zen-orange/5 rounded-lg transition-all"
+                                    title="Edit Book"
+                                  >
+                                    <Pencil className="w-5 h-5" />
+                                  </button>
+                                )}
+                                {isAdmin && (
+                                  <button
+                                    onClick={() => setDeletingId(book.id)}
+                                    className="p-2 text-zen-gray hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                    title="Delete Book"
+                                  >
+                                    <Trash2 className="w-5 h-5" />
+                                  </button>
+                                )}
                               </>
                             )}
                           </div>
@@ -434,38 +439,40 @@ export default function Admin() {
             </div>
 
             {/* Student List */}
-            <div className="bg-white rounded-3xl shadow-xl p-8 border border-zen-gray-light">
-              <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center space-x-2">
-                  <Users className="w-5 h-5 text-zen-orange" />
-                  <h2 className="text-xl font-serif font-bold text-zen-gray-dark">{t.admin.students}</h2>
+            {isAdmin && (
+              <div className="bg-white rounded-3xl shadow-xl p-8 border border-zen-gray-light">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center space-x-2">
+                    <Users className="w-5 h-5 text-zen-orange" />
+                    <h2 className="text-xl font-serif font-bold text-zen-gray-dark">{t.admin.students}</h2>
+                  </div>
+                  <span className="text-sm text-zen-gray font-medium">{users.length} {t.admin.studentsCount}</span>
                 </div>
-                <span className="text-sm text-zen-gray font-medium">{users.length} {t.admin.studentsCount}</span>
-              </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full text-left">
-                  <thead>
-                    <tr className="border-b border-zen-gray-light">
-                      <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">{t.admin.name}</th>
-                      <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">{t.admin.email}</th>
-                      <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray text-right">{t.admin.joined}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-zen-gray-light">
-                    {users.map((user) => (
-                      <tr key={user.id} className="hover:bg-zen-cream/50 transition-colors">
-                        <td className="py-4 font-medium text-zen-gray-dark">{user.name || 'Anonymous'}</td>
-                        <td className="py-4 text-sm text-zen-gray">{user.email}</td>
-                        <td className="py-4 text-sm text-zen-gray text-right">
-                          {new Date(user.created).toLocaleDateString()}
-                        </td>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="border-b border-zen-gray-light">
+                        <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">{t.admin.name}</th>
+                        <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray">{t.admin.email}</th>
+                        <th className="pb-4 font-bold text-xs uppercase tracking-wider text-zen-gray text-right">{t.admin.joined}</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody className="divide-y divide-zen-gray-light">
+                      {users.map((user) => (
+                        <tr key={user.id} className="hover:bg-zen-cream/50 transition-colors">
+                          <td className="py-4 font-medium text-zen-gray-dark">{user.name || 'Anonymous'}</td>
+                          <td className="py-4 text-sm text-zen-gray">{user.email}</td>
+                          <td className="py-4 text-sm text-zen-gray text-right">
+                            {new Date(user.created).toLocaleDateString()}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </motion.div>

@@ -44,10 +44,14 @@ export default function SignUp() {
         name,
         role: 'student',
       });
+      
+      // Auto-login after successful signup
+      await pb.collection('users').authWithPassword(email, password);
+      
       setSuccess(true);
       setTimeout(() => {
-        navigate('/login');
-      }, 3000);
+        navigate('/');
+      }, 2000);
     } catch (err: any) {
       setError(err.message || t.signup.error);
     } finally {

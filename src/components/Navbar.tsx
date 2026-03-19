@@ -42,7 +42,7 @@ export default function Navbar() {
             <Link to="/" className="text-sm font-medium text-zen-gray hover:text-zen-orange transition-colors">
               {t.nav.library}
             </Link>
-            {isValid && user?.role === 'admin' && (
+            {isValid && (
               <Link to="/admin" className="text-sm font-medium text-zen-gray hover:text-zen-orange transition-colors">
                 {t.nav.admin}
               </Link>
@@ -53,20 +53,6 @@ export default function Navbar() {
                   <span className="text-sm font-medium text-zen-gray-dark hidden md:inline">
                     {user?.name || user?.username}
                   </span>
-                  {user?.verified ? (
-                    <div className="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider">
-                      <CheckCircle2 className="w-3 h-3" />
-                      <span>Verified</span>
-                    </div>
-                  ) : (
-                    <div 
-                      className="flex items-center space-x-1 px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 text-[10px] font-bold uppercase tracking-wider cursor-help"
-                      title="Please verify your email to unlock downloads."
-                    >
-                      <AlertTriangle className="w-3 h-3" />
-                      <span>Pending</span>
-                    </div>
-                  )}
                 </div>
                 <button
                   onClick={handleLogout}
