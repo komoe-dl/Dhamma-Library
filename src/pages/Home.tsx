@@ -24,6 +24,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('all');
   
   // Upload Modal State
   const [showUploadModal, setShowUploadModal] = useState(false);
@@ -35,6 +36,7 @@ export default function Home() {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [summary, setSummary] = useState('');
+  const [category, setCategory] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
 
@@ -72,6 +74,7 @@ export default function Home() {
     formData.append('title', title);
     formData.append('author', author);
     formData.append('summary', summary);
+    formData.append('category', category);
     formData.append('file', file);
     formData.append('cover', cover);
     formData.append('uploaded_by', pb.authStore.model?.id);
@@ -84,6 +87,7 @@ export default function Home() {
       setTitle('');
       setAuthor('');
       setSummary('');
+      setCategory('');
       setFile(null);
       setCover(null);
       
@@ -106,10 +110,21 @@ export default function Home() {
     }
   };
 
-  const filteredBooks = books.filter(book => 
-    (book.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
-    (book.author?.toLowerCase() || '').includes(searchTerm.toLowerCase())
-  );
+  const filteredBooks = books.filter(book => {
+    const matchesSearch = (book.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
+                         (book.author?.toLowerCase() || '').includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'all' || book.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  const categories = [
+    { id: 'all', label: t.home.categories.all },
+    { id: 'sutta', label: t.home.categories.sutta },
+    { id: 'vinaya', label: t.home.categories.vinaya },
+    { id: 'abhidhamma', label: t.home.categories.abhidhamma },
+    { id: 'meditation', label: t.home.categories.meditation },
+    { id: 'biography', label: t.home.categories.biography },
+  ];
 
   return (
     <div className="min-h-screen">
@@ -144,6 +159,23 @@ export default function Home() {
               />
             </div>
           </div>
+        </div>
+
+        {/* Category Filter */}
+        <div className="flex flex-wrap gap-3 mb-12">
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-6 py-2 rounded-full font-bold transition-all ${
+                selectedCategory === cat.id
+                  ? 'bg-zen-gray-dark text-white shadow-lg'
+                  : 'bg-zen-cream text-zen-gray hover:bg-zen-gray-light'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
         </div>
 
         {loading ? (
@@ -236,6 +268,21 @@ export default function Home() {
                         className="w-full px-5 py-4 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-2 focus:ring-zen-orange/20 focus:border-zen-orange transition-all text-lg"
                         placeholder="Enter author name"
                       />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-bold text-zen-gray-dark uppercase tracking-wider">{t.admin.category}</label>
+                      <select
+                        required
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full px-5 py-4 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-2 focus:ring-zen-orange/20 focus:border-zen-orange transition-all text-lg appearance-none cursor-pointer"
+                      >
+                        <option value="" disabled>Select Category</option>
+                        {categories.filter(c => c.id !== 'all').map(c => (
+                          <option key={c.id} value={c.id}>{c.label}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 

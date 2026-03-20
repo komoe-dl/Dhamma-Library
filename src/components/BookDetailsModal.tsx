@@ -1,9 +1,10 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ExternalLink, User, BookOpen } from 'lucide-react';
+import { X, ExternalLink, User, BookOpen, Download } from 'lucide-react';
 import { Book } from '../types';
 import { getFileUrl } from '../lib/pocketbase';
 import { useLanguage } from '../lib/LanguageContext';
+import DhammaDiscussion from './DhammaDiscussion';
 
 interface BookDetailsModalProps {
   book: Book | null;
@@ -53,6 +54,13 @@ export default function BookDetailsModal({ book, onClose }: BookDetailsModalProp
           <div className="w-full md:w-3/5 p-8 md:p-12 overflow-y-auto">
             <div className="space-y-6">
               <div>
+                <div className="flex items-center gap-3 mb-2">
+                  {book.category && (
+                    <span className="px-3 py-1.5 rounded-full bg-red-900 text-white text-xs font-bold uppercase tracking-wider shadow-sm">
+                      {t.home.categories[book.category] || book.category}
+                    </span>
+                  )}
+                </div>
                 <h2 className="text-3xl md:text-4xl font-serif font-bold text-zen-gray-dark leading-snug">
                   {book.title}
                 </h2>
@@ -69,7 +77,7 @@ export default function BookDetailsModal({ book, onClose }: BookDetailsModalProp
                 </p>
               </div>
 
-              <div className="pt-6">
+              <div className="pt-6 flex flex-wrap gap-4">
                 <a
                   href={fileUrl}
                   target="_blank"
@@ -77,10 +85,24 @@ export default function BookDetailsModal({ book, onClose }: BookDetailsModalProp
                   className="inline-flex items-center justify-center space-x-3 bg-zen-orange hover:bg-zen-orange-light text-white px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-zen-orange/20"
                 >
                   <BookOpen className="w-5 h-5" />
-                  <span>{t.modal.readEbook}</span>
+                  <span>{t.modal.readNow}</span>
                   <ExternalLink className="w-4 h-4 opacity-50" />
                 </a>
+
+                <a
+                  href={`${fileUrl}?download=1`}
+                  className="inline-flex items-center justify-center space-x-3 bg-white border-2 border-zen-orange text-zen-orange hover:bg-zen-orange/5 px-8 py-4 rounded-full font-bold transition-all transform hover:scale-105"
+                >
+                  <Download className="w-5 h-5" />
+                  <span>{t.modal.download}</span>
+                </a>
               </div>
+
+              {/* Dhamma Discussion Section */}
+              <DhammaDiscussion 
+                bookId={book.id} 
+                initialSadhuCount={book.sadhu_count} 
+              />
             </div>
           </div>
         </motion.div>
