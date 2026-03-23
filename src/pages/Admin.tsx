@@ -5,6 +5,7 @@ import { Book } from '../types';
 import { motion } from 'motion/react';
 import { useLanguage } from '../lib/LanguageContext';
 import DefaultCover from '../components/DefaultCover';
+import { sanitizeFileName } from '../lib/utils';
 import { 
   Plus, 
   Trash2, 
@@ -43,6 +44,7 @@ export default function Admin() {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
   const [summary, setSummary] = useState('');
+  const [category, setCategory] = useState('');
   const [googleDocLink, setGoogleDocLink] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
@@ -102,9 +104,21 @@ export default function Admin() {
     formData.append('title', title);
     formData.append('author', author);
     formData.append('summary', summary);
-    formData.append('google_doc_link', googleDocLink);
-    if (file) formData.append('file', file);
-    if (cover) formData.append('cover', cover);
+    formData.append('category', category);
+    
+    if (googleDocLink.trim()) {
+      formData.append('google_doc_link', googleDocLink.trim());
+    }
+    
+    if (file) {
+      const sanitizedFile = sanitizeFileName(file, 'dhamma-ebook');
+      formData.append('file', sanitizedFile);
+    }
+    
+    if (cover) {
+      const sanitizedCover = sanitizeFileName(cover, 'dhamma-cover');
+      formData.append('cover', sanitizedCover);
+    }
 
     try {
       if (editingBook) {
@@ -115,10 +129,12 @@ export default function Admin() {
         setSuccess(t.admin.updateSuccess);
         setEditingBook(null);
       } else {
-        formData.append('uploaded_by', pb.authStore.model?.id);
-        const newBook = await pb.collection('books').create<Book>(formData, {
-          expand: 'uploaded_by'
-        });
+      if (pb.authStore.model?.id) {
+        formData.append('uploaded_by', pb.authStore.model.id);
+      }
+      const newBook = await pb.collection('books').create<Book>(formData, {
+        expand: 'uploaded_by'
+      });
         setBooks([newBook, ...books]);
         setSuccess(t.admin.addSuccess);
       }
@@ -127,10 +143,15 @@ export default function Admin() {
       setTitle('');
       setAuthor('');
       setSummary('');
+      setCategory('');
       setGoogleDocLink('');
       setFile(null);
       setCover(null);
     } catch (err: any) {
+      console.error('Admin Upload Error:', err);
+      if (err.data) {
+        console.error('Admin Validation Error Details:', JSON.stringify(err.data, null, 2));
+      }
       setError(err.message || `Failed to ${editingBook ? 'update' : 'add'} book.`);
     } finally {
       setSubmitting(false);
@@ -142,6 +163,7 @@ export default function Admin() {
     setTitle(book.title);
     setAuthor(book.author);
     setSummary(book.summary);
+    setCategory(book.category || '');
     setGoogleDocLink(book.google_doc_link || '');
     setFile(null);
     setCover(null);
@@ -155,6 +177,7 @@ export default function Admin() {
     setTitle('');
     setAuthor('');
     setSummary('');
+    setCategory('');
     setGoogleDocLink('');
     setFile(null);
     setCover(null);
@@ -226,6 +249,14 @@ export default function Admin() {
   const filteredUsers = users.filter(user => 
     (user.email?.toLowerCase() || '').includes(userSearchTerm.toLowerCase())
   );
+
+  const categories = [
+    { id: 'sutta', label: t.home.categories.sutta },
+    { id: 'vinaya', label: t.home.categories.vinaya },
+    { id: 'abhidhamma', label: t.home.categories.abhidhamma },
+    { id: 'meditation', label: t.home.categories.meditation },
+    { id: 'history', label: t.home.categories.history },
+  ];
 
   if (loading) {
     return (
@@ -328,6 +359,21 @@ export default function Admin() {
                     className="w-full px-4 py-3 rounded-xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-2 focus:ring-zen-orange/20 focus:border-zen-orange transition-all resize-none"
                     placeholder={t.admin.summary}
                   />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-zen-gray-dark uppercase tracking-wider">{t.admin.category}</label>
+                  <select
+                    required
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-2 focus:ring-zen-orange/20 focus:border-zen-orange transition-all appearance-none cursor-pointer"
+                  >
+                    <option value="" disabled>Select Category</option>
+                    {categories.map(c => (
+                      <option key={c.id} value={c.id}>{c.label}</option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-1">

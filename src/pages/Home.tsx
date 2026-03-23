@@ -18,6 +18,7 @@ import {
   AlertCircle 
 } from 'lucide-react';
 import { useLanguage } from '../lib/LanguageContext';
+import { sanitizeFileName } from '../lib/utils';
 
 export default function Home() {
   const { t } = useLanguage();
@@ -38,6 +39,7 @@ export default function Home() {
   const [author, setAuthor] = useState('');
   const [summary, setSummary] = useState('');
   const [category, setCategory] = useState('');
+  const [googleDocLink, setGoogleDocLink] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
 
@@ -76,12 +78,29 @@ export default function Home() {
     formData.append('author', author);
     formData.append('summary', summary);
     formData.append('category', category);
-    formData.append('file', file);
-    formData.append('cover', cover);
-    formData.append('uploaded_by', pb.authStore.model?.id);
+    
+    if (googleDocLink.trim()) {
+      formData.append('google_doc_link', googleDocLink.trim());
+    }
+    
+    if (file) {
+      const sanitizedFile = sanitizeFileName(file, 'dhamma-student-upload');
+      formData.append('file', sanitizedFile);
+    }
+    
+    if (cover) {
+      const sanitizedCover = sanitizeFileName(cover, 'dhamma-student-cover');
+      formData.append('cover', sanitizedCover);
+    }
+    
+    if (pb.authStore.model?.id) {
+      formData.append('uploaded_by', pb.authStore.model.id);
+    }
 
     try {
-      await pb.collection('books').create(formData);
+      await pb.collection('books').create<Book>(formData, {
+        expand: 'uploaded_by'
+      });
       setUploadSuccess(t.admin.uploadSuccess);
       
       // Reset form
@@ -89,6 +108,7 @@ export default function Home() {
       setAuthor('');
       setSummary('');
       setCategory('');
+      setGoogleDocLink('');
       setFile(null);
       setCover(null);
       
@@ -105,6 +125,10 @@ export default function Home() {
         setUploadSuccess('');
       }, 3000);
     } catch (err: any) {
+      console.error('Student Upload Error:', err);
+      if (err.data) {
+        console.error('Validation Error Details:', JSON.stringify(err.data, null, 2));
+      }
       setUploadError(err.message || 'Failed to upload book.');
     } finally {
       setUploadLoading(false);
@@ -124,7 +148,7 @@ export default function Home() {
     { id: 'vinaya', label: t.home.categories.vinaya },
     { id: 'abhidhamma', label: t.home.categories.abhidhamma },
     { id: 'meditation', label: t.home.categories.meditation },
-    { id: 'biography', label: t.home.categories.biography },
+    { id: 'history', label: t.home.categories.history },
   ];
 
   return (
@@ -216,11 +240,16 @@ export default function Home() {
               className="bg-white rounded-[2rem] shadow-2xl p-8 max-w-2xl w-full border border-zen-gray-light overflow-y-auto max-h-[90vh]"
             >
               <div className="flex items-center justify-between mb-8">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-zen-orange/10 rounded-2xl flex items-center justify-center">
-                    <Plus className="w-6 h-6 text-zen-orange" />
+                <div className="flex items-center space-x-4">
+                  <div className="w-14 h-14 bg-zen-orange/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                    <Plus className="w-7 h-7 text-zen-orange" />
                   </div>
-                  <h2 className="text-2xl font-serif font-bold text-zen-gray-dark">{t.admin.uploadBook}</h2>
+                  <div>
+                    <h2 className="text-2xl font-serif font-bold text-zen-gray-dark leading-tight">{t.admin.uploadBook}</h2>
+                    <p className="text-sm text-zen-gray font-bold mt-1 uppercase tracking-wider">
+                      {t.nav.title} — {t.admin.forStudents}
+                    </p>
+                  </div>
                 </div>
                 <button 
                   onClick={() => setShowUploadModal(false)}
@@ -231,16 +260,24 @@ export default function Home() {
               </div>
 
               {uploadError && (
-                <div className="mb-6 p-4 rounded-2xl bg-red-50 text-red-600 flex items-start space-x-3">
-                  <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                  <span>{uploadError}</span>
+                <div className="mb-6 p-6 rounded-2xl bg-red-50 border border-red-100 text-red-700 flex items-start space-x-4 shadow-sm">
+                  <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <AlertCircle className="w-6 h-6" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-bold text-lg mb-1">Error to upload</p>
+                    <p className="text-base opacity-90">{uploadError}</p>
+                  </div>
                 </div>
               )}
 
               {uploadSuccess && (
-                <div className="mb-6 p-6 rounded-2xl bg-green-50 text-green-700 flex flex-col items-center text-center space-y-2">
-                  <CheckCircle2 className="w-10 h-10" />
-                  <span className="text-lg font-bold">{uploadSuccess}</span>
+                <div className="mb-6 p-10 rounded-[2.5rem] bg-green-50 border border-green-100 text-green-800 flex flex-col items-center text-center space-y-4 shadow-inner">
+                  <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-2">
+                    <CheckCircle2 className="w-12 h-12 text-green-600" />
+                  </div>
+                  <h3 className="text-3xl font-serif font-bold">သာဓု... သာဓု... သာဓု...</h3>
+                  <p className="text-xl font-medium max-w-md">{uploadSuccess}</p>
                 </div>
               )}
 
@@ -248,36 +285,36 @@ export default function Home() {
                 <form onSubmit={handleUpload} className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-zen-gray-dark uppercase tracking-wider">{t.admin.bookTitle}</label>
+                      <label className="text-base font-bold text-zen-gray-dark uppercase tracking-widest">{t.admin.bookTitle}</label>
                       <input
                         type="text"
                         required
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        className="w-full px-5 py-4 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-2 focus:ring-zen-orange/20 focus:border-zen-orange transition-all text-lg"
+                        className="w-full px-6 py-5 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-4 focus:ring-zen-orange/10 focus:border-zen-orange transition-all text-xl font-medium"
                         placeholder="Enter book title"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-zen-gray-dark uppercase tracking-wider">{t.admin.author}</label>
+                      <label className="text-base font-bold text-zen-gray-dark uppercase tracking-widest">{t.admin.author}</label>
                       <input
                         type="text"
                         required
                         value={author}
                         onChange={(e) => setAuthor(e.target.value)}
-                        className="w-full px-5 py-4 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-2 focus:ring-zen-orange/20 focus:border-zen-orange transition-all text-lg"
+                        className="w-full px-6 py-5 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-4 focus:ring-zen-orange/10 focus:border-zen-orange transition-all text-xl font-medium"
                         placeholder="Enter author name"
                       />
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-sm font-bold text-zen-gray-dark uppercase tracking-wider">{t.admin.category}</label>
+                      <label className="text-base font-bold text-zen-gray-dark uppercase tracking-widest">{t.admin.category}</label>
                       <select
                         required
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full px-5 py-4 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-2 focus:ring-zen-orange/20 focus:border-zen-orange transition-all text-lg appearance-none cursor-pointer"
+                        className="w-full px-6 py-5 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-4 focus:ring-zen-orange/10 focus:border-zen-orange transition-all text-xl font-medium appearance-none cursor-pointer"
                       >
                         <option value="" disabled>Select Category</option>
                         {categories.filter(c => c.id !== 'all').map(c => (
@@ -285,16 +322,27 @@ export default function Home() {
                         ))}
                       </select>
                     </div>
+
+                    <div className="space-y-2">
+                      <label className="text-base font-bold text-zen-gray-dark uppercase tracking-widest">{t.admin.googleDocLink}</label>
+                      <input
+                        type="url"
+                        value={googleDocLink}
+                        onChange={(e) => setGoogleDocLink(e.target.value)}
+                        className="w-full px-6 py-5 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-4 focus:ring-zen-orange/10 focus:border-zen-orange transition-all text-xl font-medium"
+                        placeholder="https://docs.google.com/..."
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-bold text-zen-gray-dark uppercase tracking-wider">{t.admin.summary}</label>
+                    <label className="text-base font-bold text-zen-gray-dark uppercase tracking-widest">{t.admin.summary}</label>
                     <textarea
                       required
                       value={summary}
                       onChange={(e) => setSummary(e.target.value)}
                       rows={4}
-                      className="w-full px-5 py-4 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-2 focus:ring-zen-orange/20 focus:border-zen-orange transition-all text-lg resize-none"
+                      className="w-full px-6 py-5 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-4 focus:ring-zen-orange/10 focus:border-zen-orange transition-all text-xl font-medium resize-none"
                       placeholder="Write a brief summary..."
                     />
                   </div>

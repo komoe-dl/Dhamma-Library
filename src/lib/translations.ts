@@ -3,7 +3,7 @@ export type Language = 'my' | 'en';
 export const translations = {
   my: {
     nav: {
-      title: 'ဓမ္မ စာကြည့်တိုက်',
+      title: 'ဓမ္မစာကြည့်တိုက်',
       library: 'စာကြည့်တိုက်',
       admin: 'စီမံခန့်ခွဲသူ',
       logout: 'ထွက်ရန်',
@@ -12,7 +12,7 @@ export const translations = {
       guide: 'လမ်းညွှန်',
     },
     hero: {
-      badge: 'ဓမ္မ စာကြည့်တိုက်',
+      badge: 'ဓမ္မစာကြည့်တိုက်',
       title: 'ရှေ့စိတ်မှာ အရှိကိုမြင်၊ နောက်စိတ်မှာ သတိယှဉ်၍ ဘဝဒုက္ခကို အဖြေရှာပါ',
       subtitle: 'သမုတိနယ်မှသည် ပရမတ်နယ်သို့... ဆရာကြီး၏ ဓမ္မလမ်းညွှန်ချက်များ၊ သတိပဋ္ဌာန်ကျင့်စဉ်များနှင့် ဘဝအကျဉ်းသားအဖြစ်မှ လွတ်မြောက်ရာ အသိပညာများကို လေ့လာပါ။',
       explore: 'စာကြည့်တိုက်သို့ သွားရန်',
@@ -30,7 +30,7 @@ export const translations = {
         vinaya: 'ဝိနည်း',
         abhidhamma: 'အဘိဓမ္မာ',
         meditation: 'တရားအားထုတ်ရန်',
-        biography: 'အတ္ထုပ္ပတ္တိ',
+        history: 'အတ္ထုပ္ပတ္တိ',
       },
     },
     modal: {
@@ -106,8 +106,9 @@ export const translations = {
       googleDocLink: 'Google Doc Link (Optional)',
       resetPassword: 'လျှို့ဝှက်နံပါတ် ပြန်လည်သတ်မှတ်ရန်',
       resetPasswordSuccess: 'လျှို့ဝှက်နံပါတ် ပြန်လည်သတ်မှတ်ခြင်း အောင်မြင်ပါသည်။ ကျေးဇူးပြု၍ ကျောင်းသားအား အကြောင်းကြားပါ။',
-      uploadBook: '+ ဓမ္မစာအုပ် တင်ရန်',
+      uploadBook: 'ဓမ္မစာအုပ် တင်ရန်',
       uploadSuccess: 'သာဓု! သင်၏စာအုပ်ကို ဓမ္မမိတ်ဆွေများအတွက် မျှဝေပြီးပါပြီ။',
+      forStudents: 'ဓမ္မသင်တန်းသားများအတွက်',
     },
     profile: {
       title: 'ကိုယ်ရေးအချက်အလက်',
@@ -170,7 +171,7 @@ export const translations = {
         vinaya: 'Vinaya',
         abhidhamma: 'Abhidhamma',
         meditation: 'Meditation',
-        biography: 'Biography',
+        history: 'Biography',
       },
     },
     modal: {
@@ -246,8 +247,9 @@ export const translations = {
       googleDocLink: 'Google Doc Link (Optional)',
       resetPassword: 'Reset Password',
       resetPasswordSuccess: 'Password reset successful! Please inform the student.',
-      uploadBook: '+ Upload Dhamma Ebook',
+      uploadBook: 'Upload Dhamma Ebook',
       uploadSuccess: 'Sadhu! Your book has been shared with the community.',
+      forStudents: 'For Dhamma Students',
     },
     profile: {
       title: 'User Profile',
