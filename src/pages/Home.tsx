@@ -53,21 +53,31 @@ export default function Home() {
   const isLoggedIn = pb.authStore.isValid;
 
   useEffect(() => {
+    const controller = new AbortController();
+
     const fetchBooks = async () => {
       try {
         const records = await pb.collection('books').getFullList<Book>({
           sort: '-created',
           requestKey: null,
+          signal: controller.signal,
         });
         setBooks(records);
-      } catch (error) {
-        console.error('Error fetching books:', error);
+      } catch (error: any) {
+        if (error.name !== 'AbortError') {
+          console.error('Error fetching books:', error);
+          setUploadError('Failed to load books. Please refresh the page.');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchBooks();
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   const handleUpload = async (e: React.FormEvent) => {

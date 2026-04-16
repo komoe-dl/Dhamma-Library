@@ -65,27 +65,40 @@ export default function Admin() {
       return;
     }
 
+    const controller = new AbortController();
+
     const fetchData = async () => {
       try {
         const [booksList, usersList] = await Promise.all([
           pb.collection('books').getFullList<Book>({ 
             sort: '-created', 
             requestKey: null,
-            expand: 'uploaded_by'
+            expand: 'uploaded_by',
+            signal: controller.signal,
           }),
-          isAdmin ? pb.collection('users').getFullList<UserRecord>({ sort: '-created', requestKey: null }) : Promise.resolve([])
+          isAdmin ? pb.collection('users').getFullList<UserRecord>({ 
+            sort: '-created', 
+            requestKey: null,
+            signal: controller.signal,
+          }) : Promise.resolve([])
         ]);
         setBooks(booksList);
         setUsers(usersList);
-      } catch (err) {
-        console.error('Error fetching admin data:', err);
-        setError('Failed to load data. Please check your permissions.');
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching admin data:', err);
+          setError('Failed to load data. Please check your permissions.');
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
+
+    return () => {
+      controller.abort();
+    };
   }, [isLoggedIn, isAdmin, navigate]);
 
   const handleAddBook = async (e: React.FormEvent) => {

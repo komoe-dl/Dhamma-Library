@@ -45,6 +45,7 @@ export default function Navbar() {
           <div className="hidden lg:flex items-center space-x-6">
             <button
               onClick={toggleLanguage}
+              aria-label={language === 'my' ? 'Switch to English' : 'မြန်မာဘာသာသို့ ပြောင်းရန်'}
               className="flex items-center space-x-1 px-3 py-1.5 rounded-full bg-zen-orange/10 text-zen-orange hover:bg-zen-orange hover:text-white transition-all text-xs font-bold"
             >
               <Languages className="w-3.5 h-3.5" />
@@ -94,6 +95,7 @@ export default function Navbar() {
           <div className="flex lg:hidden items-center space-x-3">
             <button
               onClick={toggleLanguage}
+              aria-label={language === 'my' ? 'Switch to English' : 'မြန်မာဘာသာသို့ ပြောင်းရန်'}
               className="flex items-center space-x-1 px-2.5 py-1 rounded-full bg-zen-orange/10 text-zen-orange text-[10px] font-bold"
             >
               <Languages className="w-3 h-3" />
@@ -101,6 +103,8 @@ export default function Navbar() {
             </button>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
+              aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={isMenuOpen}
               className="p-2 text-zen-gray-dark hover:text-zen-orange transition-colors"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

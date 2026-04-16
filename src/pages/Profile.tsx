@@ -42,21 +42,31 @@ export default function Profile() {
   useEffect(() => {
     if (!user) return;
     
+    const controller = new AbortController();
+
     const fetchMyBooks = async () => {
       try {
         const records = await pb.collection('books').getFullList<Book>({
           filter: `uploaded_by = "${user.id}"`,
           sort: '-created',
+          signal: controller.signal,
         });
         setMyBooks(records);
-      } catch (err) {
-        console.error('Error fetching contributions:', err);
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          console.error('Error fetching contributions:', err);
+          setError('Failed to load your contributions.');
+        }
       } finally {
         setLoadingBooks(false);
       }
     };
 
     fetchMyBooks();
+
+    return () => {
+      controller.abort();
+    };
   }, [user]);
 
   const handleUpdateProfile = async (e: React.FormEvent) => {

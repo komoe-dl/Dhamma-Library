@@ -32,7 +32,10 @@ export default function DhammaDiscussion({ bookId, initialSadhuCount = 0 }: Dham
   const isLoggedIn = pb.authStore.isValid;
 
   useEffect(() => {
-    fetchComments();
+    const controller = new AbortController();
+    
+    fetchComments(controller.signal);
+
     // Subscribe to real-time updates for comments
     pb.collection('comments').subscribe('*', (e) => {
       if (e.action === 'create' && e.record.book === bookId) {
@@ -43,21 +46,25 @@ export default function DhammaDiscussion({ bookId, initialSadhuCount = 0 }: Dham
     }, { expand: 'user' });
 
     return () => {
+      controller.abort();
       pb.collection('comments').unsubscribe('*');
     };
   }, [bookId]);
 
-  const fetchComments = async () => {
+  const fetchComments = async (signal?: AbortSignal) => {
     try {
       const records = await pb.collection('comments').getFullList<Comment>({
         filter: `book = "${bookId}"`,
         sort: '-created',
         expand: 'user',
         requestKey: null,
+        signal: signal,
       });
       setComments(records);
-    } catch (error) {
-      console.error('Error fetching comments:', error);
+    } catch (error: any) {
+      if (error.name !== 'AbortError') {
+        console.error('Error fetching comments:', error);
+      }
     } finally {
       setLoading(false);
     }

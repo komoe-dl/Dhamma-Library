@@ -20,10 +20,11 @@ const BookCard: React.FC<BookCardProps> = ({ book, onClick }) => {
   };
 
   return (
-    <motion.div
+    <motion.button
       whileHover={{ y: -8 }}
-      className="group cursor-pointer"
+      className="group text-left w-full focus:outline-none focus-visible:ring-2 focus-visible:ring-zen-orange rounded-xl"
       onClick={() => onClick(book)}
+      aria-label={`${book.title} by ${book.author}`}
     >
       <div className="relative aspect-[3/4] overflow-hidden rounded-xl shadow-lg transition-shadow group-hover:shadow-2xl bg-zen-gray-light">
         {coverUrl ? (
@@ -60,7 +61,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, onClick }) => {
         </h3>
         <p className="text-zen-gray text-sm mt-1 italic">{book.author}</p>
       </div>
-    </motion.div>
+    </motion.button>
   );
 };
 
