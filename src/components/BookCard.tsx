@@ -32,6 +32,10 @@ const BookCard: React.FC<BookCardProps> = ({ book, onClick }) => {
             alt={book.title}
             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
             referrerPolicy="no-referrer"
+            loading="lazy"
+            decoding="async"
+            width="400"
+            height="533"
           />
         ) : (
           <DefaultCover title={book.title} author={book.author} />

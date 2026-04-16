@@ -273,6 +273,10 @@ export default function Profile() {
                           alt="" 
                           className="w-full h-full object-cover"
                           referrerPolicy="no-referrer"
+                          loading="lazy"
+                          decoding="async"
+                          width="80"
+                          height="112"
                         />
                       </div>
                       <div className="flex-grow min-w-0 flex flex-col justify-between">

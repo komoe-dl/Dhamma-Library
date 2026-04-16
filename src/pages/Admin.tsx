@@ -502,6 +502,10 @@ export default function Admin() {
                                   alt="" 
                                   className="w-full h-full object-cover"
                                   referrerPolicy="no-referrer"
+                                  loading="lazy"
+                                  decoding="async"
+                                  width="40"
+                                  height="56"
                                 />
                               ) : (
                                 <DefaultCover title={book.title} author={book.author} className="text-[4px] p-1 space-y-1" />

@@ -50,6 +50,10 @@ export default function BookDetailsModal({ book, onClose }: BookDetailsModalProp
                 alt={book.title}
                 className="w-full h-full object-cover"
                 referrerPolicy="no-referrer"
+                loading="lazy"
+                decoding="async"
+                width="600"
+                height="800"
               />
             ) : (
               <DefaultCover title={book.title} author={book.author} />
