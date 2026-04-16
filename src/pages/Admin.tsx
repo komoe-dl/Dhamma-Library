@@ -85,10 +85,9 @@ export default function Admin() {
         setBooks(booksList);
         setUsers(usersList);
       } catch (err: any) {
-        if (err.name !== 'AbortError') {
-          console.error('Error fetching admin data:', err);
-          setError('Failed to load data. Please check your permissions.');
-        }
+        if (err.isAbort) return;
+        console.error('Error fetching admin data:', err);
+        setError('Failed to load data. Please check your permissions.');
       } finally {
         setLoading(false);
       }
@@ -352,11 +351,15 @@ export default function Admin() {
                   <input
                     type="text"
                     required
+                    list="admin-authors-list"
                     value={author}
                     onChange={(e) => setAuthor(e.target.value)}
                     className="w-full px-5 py-4 rounded-xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-2 focus:ring-zen-orange/20 focus:border-zen-orange transition-all text-lg"
                     placeholder={t.admin.author}
                   />
+                  <datalist id="admin-authors-list">
+                    <option value="Dr. Soe Lwin" />
+                  </datalist>
                 </div>
 
                 <div className="space-y-2">

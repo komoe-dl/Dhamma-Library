@@ -62,9 +62,8 @@ export default function DhammaDiscussion({ bookId, initialSadhuCount = 0 }: Dham
       });
       setComments(records);
     } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        console.error('Error fetching comments:', error);
-      }
+      if (error.isAbort) return;
+      console.error('Error fetching comments:', error);
     } finally {
       setLoading(false);
     }

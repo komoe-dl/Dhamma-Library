@@ -64,10 +64,9 @@ export default function Home() {
         });
         setBooks(records);
       } catch (error: any) {
-        if (error.name !== 'AbortError') {
-          console.error('Error fetching books:', error);
-          setUploadError('Failed to load books. Please refresh the page.');
-        }
+        if (error.isAbort) return;
+        console.error('Error fetching books:', error);
+        setUploadError('Failed to load books. Please refresh the page.');
       } finally {
         setLoading(false);
       }
@@ -315,11 +314,15 @@ export default function Home() {
                       <input
                         type="text"
                         required
+                        list="authors-list"
                         value={author}
                         onChange={(e) => setAuthor(e.target.value)}
                         className="w-full px-6 py-5 rounded-2xl bg-zen-cream border border-zen-gray-light focus:outline-none focus:ring-4 focus:ring-zen-orange/10 focus:border-zen-orange transition-all text-xl font-medium"
                         placeholder="Enter author name"
                       />
+                      <datalist id="authors-list">
+                        <option value="Dr. Soe Lwin" />
+                      </datalist>
                     </div>
 
                     <div className="space-y-2">

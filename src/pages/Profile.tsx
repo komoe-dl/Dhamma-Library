@@ -49,14 +49,14 @@ export default function Profile() {
         const records = await pb.collection('books').getFullList<Book>({
           filter: `uploaded_by = "${user.id}"`,
           sort: '-created',
+          requestKey: null,
           signal: controller.signal,
         });
         setMyBooks(records);
       } catch (err: any) {
-        if (err.name !== 'AbortError') {
-          console.error('Error fetching contributions:', err);
-          setError('Failed to load your contributions.');
-        }
+        if (err.isAbort) return;
+        console.error('Error fetching contributions:', err);
+        setError('Failed to load your contributions.');
       } finally {
         setLoadingBooks(false);
       }
