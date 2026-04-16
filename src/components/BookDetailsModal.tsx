@@ -1,11 +1,13 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { Helmet } from 'react-helmet-async';
 import { X, ExternalLink, User, BookOpen, Download } from 'lucide-react';
 import { Book } from '../types';
 import { getFileUrl } from '../lib/pocketbase';
 import { useLanguage } from '../lib/LanguageContext';
 import DhammaDiscussion from './DhammaDiscussion';
 import DefaultCover from './DefaultCover';
+import BookStructuredData from './BookStructuredData';
 
 interface BookDetailsModalProps {
   book: Book | null;
@@ -14,14 +16,78 @@ interface BookDetailsModalProps {
 
 export default function BookDetailsModal({ book, onClose }: BookDetailsModalProps) {
   const { t } = useLanguage();
+  const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (book) {
+      // Store the element that had focus before the modal opened
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === 'Escape') {
+          onClose();
+        }
+
+        if (e.key === 'Tab' && modalRef.current) {
+          const focusableElements = modalRef.current.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+          const firstElement = focusableElements[0] as HTMLElement;
+          const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
+
+          if (e.shiftKey) {
+            if (document.activeElement === firstElement) {
+              lastElement.focus();
+              e.preventDefault();
+            }
+          } else {
+            if (document.activeElement === lastElement) {
+              firstElement.focus();
+              e.preventDefault();
+            }
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleKeyDown);
+      
+      // Focus the first element in the modal
+      const timer = setTimeout(() => {
+        const firstFocusable = modalRef.current?.querySelector('button, [href]') as HTMLElement;
+        firstFocusable?.focus();
+      }, 100);
+
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+        // Return focus to the previous element when modal closes
+        previousFocusRef.current?.focus();
+        clearTimeout(timer);
+      };
+    }
+  }, [book, onClose]);
+
   if (!book) return null;
 
   const fileUrl = getFileUrl(book.collectionId, book.id, book.file);
   const coverUrl = book.cover ? getFileUrl(book.collectionId, book.id, book.cover) : null;
 
   return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+    <>
+      <Helmet>
+        <title>{`${book.title} | Dhamma Mindset Library`}</title>
+        <meta name="description" content={book.summary} />
+        <meta property="og:title" content={book.title} />
+        <meta property="og:description" content={book.summary} />
+        {coverUrl && <meta property="og:image" content={coverUrl} />}
+        <meta property="og:type" content="book" />
+        <meta name="twitter:title" content={book.title} />
+        <meta name="twitter:description" content={book.summary} />
+        {coverUrl && <meta name="twitter:image" content={coverUrl} />}
+      </Helmet>
+      <BookStructuredData book={book} />
+      <AnimatePresence>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -31,13 +97,18 @@ export default function BookDetailsModal({ book, onClose }: BookDetailsModalProp
         />
         
         <motion.div
+          ref={modalRef}
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
           className="relative w-full max-w-4xl bg-zen-cream rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row max-h-[90vh]"
         >
           <button
             onClick={onClose}
+            aria-label={t.admin.cancel}
             className="absolute top-4 right-4 z-10 p-2 rounded-full bg-white/80 hover:bg-white text-zen-gray-dark shadow-md transition-colors"
           >
             <X className="w-5 h-5" />
@@ -70,7 +141,7 @@ export default function BookDetailsModal({ book, onClose }: BookDetailsModalProp
                     </span>
                   )}
                 </div>
-                <h2 className="text-3xl md:text-4xl font-serif font-bold text-zen-gray-dark leading-snug">
+                <h2 id="modal-title" className="text-3xl md:text-4xl font-serif font-bold text-zen-gray-dark leading-snug">
                   {book.title}
                 </h2>
                 <div className="flex items-center mt-3 text-zen-orange space-x-2">
@@ -134,5 +205,6 @@ export default function BookDetailsModal({ book, onClose }: BookDetailsModalProp
         </motion.div>
       </div>
     </AnimatePresence>
+    </>
   );
 }
